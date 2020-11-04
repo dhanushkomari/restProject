@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>TODO APP</title>
+    <link rel="stylesheet" href="{% static 'css/master.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  </head>
+
+  <body>
+
+    <div class="container">
+
+		<div id="task-container">
+			<div id="form-wrapper">
+				<form id="form">
+					<div class="flex-wrapper">
+						<div style="flex: 6">
+							<input id="title" class="form-control" type="text" name="title" placeholder="Add task">
+						</div>
+						<div style="flex: 1">
+							<input id="submit" class="btn" type="submit" >
+						</div>
+					</div>
+				</form>
+			</div>
+
+			<div id="list-wrapper">
+
+			</div>
+		</div>
+
+	</div>
+
+
+    	
+        <script type="text/javascript">
+
+        function getCookie(name) {
+		    let cookieValue = null;
+		    if (document.cookie && document.cookie !== '') {
+		        const cookies = document.cookie.split(';');
+		        for (let i = 0; i < cookies.length; i++) {
+		            const cookie = cookies[i].trim();
+		            // Does this cookie string begin with the name we want?
+		            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+		                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+		                break;
+		            		}
+		        		}
+		    		}
+		    		return cookieValue;
+				}
+		const csrftoken = getCookie('csrftoken');
+
+
+        buildList()
+
+        function buildList(){
+          var wrapper = document.getElementById('list-wrapper')
+          wrapper.innerHTML = ''
+
+          var url = "http://127.0.0.1:8000/api/task-list"
+
+          fetch(url)
+          .then((resp) => resp.json())
+          .then(function(data){
+            console.log('Data:', data);
+
+            var list = data
+            for(var i in list){
+            	var item = `
+            		<div id = data-row-${i} class="task-wrapper flex-wrapper">
+            			<div style="flex:7">
+            				<span class="title">${list[i].title}</span>
+            			</div>
+            			<div style="flex:1">
+            				<span class="btn btn-sm btn-outline-info edit">Edit</span>
+            			</div>
+            			<div style="flex:1">
+            				<span class="btn btn-sm btn-outline-dark delete">-</span>
+            			</div>
+
+            		</div>
+            	`
+            	wrapper.innerHTML += item
+
+            }
+          })
+        }
+
+
+
+        var form = document.getElementById('form-wrapper')
+        form.addEventListener('submit', function(e){
+        	e.preventDefault()
+        	console.log('form submitted')
+
+        	var url = "http://127.0.0.1:8000/api/task-create"
+        	var title = document.getElementById('title').value
+        	
+        	fetch(url,{
+		        		method:'POST',
+		        		header:{
+		        			'Content-type': 'application/json',
+		        			'X_CSRFToken': csrftoken,
+		              	},
+		              	body:JSON.stringify({'title':title})})
+        	.then(function(response){
+				buildList()
+				})
+ 
+        })
+
+
+    </script>
+  </body>
+</html>
